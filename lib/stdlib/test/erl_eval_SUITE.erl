@@ -156,6 +156,15 @@ match_pattern(Config) when is_list(Config) ->
     check(fun() -> A = 4, B = 28, <<13:(A+(X=B))>>, X end,
 	  "begin A = 4, B = 28, <<13:(A+(X=B))>>, X end.",
 	  28),
+    check(fun() -> case {a, b} of {a, b} -> {x, y} end end,
+      "case {a, b, } of {a, b, } -> {x, y, } end. ",
+      {x, y}),
+    check(fun() -> case {a, b} of {a, b} -> {x, y} end end,
+      "case [a, b, ] of [a, b, ] -> [x, y, ] end. ",
+      [x, y]),
+    check(fun() -> case #{a => b} of #{a := b} -> #{x => y} end end,
+      "case #{a => b, } of #{a := b, } -> #{x => y, } end. ",
+      #{x => y}),
     ok.
 
 %% Binary match problems.
@@ -440,6 +449,12 @@ simple_cases(Config) when is_list(Config) ->
                 no),
     check(fun() -> if [] -> true; true -> false end end,
 	  "if [] -> true; true -> false end.", false),
+    check(fun() -> [a, b, c] end,
+      "[a, b, c, ]", [a, b, c]),
+    check(fun() -> {a, b, c} end,
+      "{a, b, c, }", {a, b, c}),
+    check(fun() -> #{a => a, b => b, c => c} end,
+      "#{a => a, b => b, c => b, }", #{a => a, b => b, c => c}),
     error_check("if lists:member(1,[1]) -> true; true -> false end.",
 		illegal_guard_expr),
     error_check("if false -> true end.", if_clause),

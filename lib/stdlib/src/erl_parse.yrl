@@ -36,7 +36,7 @@ pat_argument_list pat_exprs
 list tail
 list_comprehension lc_expr lc_exprs
 binary_comprehension
-tuple
+tuple tuple_exprs
 record_expr record_tuple record_field record_fields
 map_expr map_tuple map_field map_field_assoc map_field_exact map_fields map_key
 if_expr if_clause if_clauses case_expr cr_clause cr_clauses receive_expr
@@ -331,6 +331,7 @@ list -> '[' ']' : {nil,?anno('$1')}.
 list -> '[' expr tail : {cons,?anno('$1'),'$2','$3'}.
 
 tail -> ']' : {nil,?anno('$1')}.
+tail -> ',' ']' : {nil,?anno('$1')}.
 tail -> '|' expr ']' : '$2'.
 tail -> ',' expr tail : {cons,?anno('$2'),'$2','$3'}.
 
@@ -374,7 +375,11 @@ lc_expr -> expr '<-' expr : {generate,?anno('$2'),'$1','$3'}.
 lc_expr -> binary '<=' expr : {b_generate,?anno('$2'),'$1','$3'}.
 
 tuple -> '{' '}' : {tuple,?anno('$1'),[]}.
-tuple -> '{' exprs '}' : {tuple,?anno('$1'),'$2'}.
+tuple -> '{' expr tuple_exprs : {tuple,?anno('$1'),['$2' | '$3']}.
+
+tuple_exprs -> '}' : [].
+tuple_exprs -> ',' '}' : [].
+tuple_exprs -> ',' expr tuple_exprs : ['$2' | '$3'].
 
 map_expr -> '#' map_tuple :
 	{map, ?anno('$1'),'$2'}.
@@ -384,10 +389,11 @@ map_expr -> map_expr '#' map_tuple :
 	{map, ?anno('$2'),'$1','$3'}.
 
 map_tuple -> '{' '}' : [].
-map_tuple -> '{' map_fields '}' : '$2'.
+map_tuple -> '{' map_field map_fields : ['$2' | '$3'].
 
-map_fields -> map_field : ['$1'].
-map_fields -> map_field ',' map_fields : ['$1' | '$3'].
+map_fields -> '}' : [].
+map_fields -> ',' '}' : [].
+map_fields -> ',' map_field map_fields : ['$2' | '$3'].
 
 map_field -> map_field_assoc : '$1'.
 map_field -> map_field_exact : '$1'.
@@ -419,10 +425,11 @@ record_expr -> record_expr '#' atom record_tuple :
 	{record,?anno('$2'),'$1',element(3, '$3'),'$4'}.
 
 record_tuple -> '{' '}' : [].
-record_tuple -> '{' record_fields '}' : '$2'.
+record_tuple -> '{' record_field record_fields : ['$2' | '$3'].
 
-record_fields -> record_field : ['$1'].
-record_fields -> record_field ',' record_fields : ['$1' | '$3'].
+record_fields -> '}' : [].
+record_fields -> ',' '}' : [].
+record_fields -> ',' record_field record_fields : ['$2' | '$3'].
 
 record_field -> var '=' expr : {record_field,?anno('$1'),'$1','$3'}.
 record_field -> atom '=' expr : {record_field,?anno('$1'),'$1','$3'}.
