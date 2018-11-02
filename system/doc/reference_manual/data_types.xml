@@ -196,6 +196,10 @@ adam
 3
 6> <input>tuple_size({}).</input>
 0</pre>
+    <p>It's allowed to have trailing comma after the last tuple element:</p>
+    <pre>
+1> <input>{one, two, }</input>
+{one,two}</pre>
   </section>
 
   <section>
@@ -228,6 +232,10 @@ adam
       in STDLIB.</p>
     <p>Read more about maps in <seealso marker="expressions#map_expressions">
       Map Expressions</seealso>.</p>
+    <p>It's allowed to have trailing comma after the last key-value pair:</p>
+    <pre>
+1> <input>#{key1 => val1, key2 => val2, }</input>
+#{key1 => val1,key2 => val2}</pre>
   <note>
     <p>Maps are considered to be experimental during Erlang/OTP R17.</p>
   </note>
@@ -273,6 +281,10 @@ a
 3
 7> <input>length([]).</input>
 0</pre>
+    <p>It's allowed to have trailing comma after the last element of a list:</p>
+    <pre>
+1> <input>[a, b, ]</input>
+[a,b]</pre>
     <p>A collection of list processing functions can be found in
       the <seealso marker="stdlib:lists">lists</seealso> manual
       page in STDLIB.</p>
@@ -316,6 +328,7 @@ new(Name, Age) ->
 
 1> <input>person:new(ernie, 44).</input>
 {person,ernie,44}</pre>
+    <p>Trailing comma is allowed in both record definition and expressions.</p>
     <p>Read more about records in
       <seealso marker="records">Records</seealso>. More examples can be
       found in <seealso marker="doc/programming_examples:records">
