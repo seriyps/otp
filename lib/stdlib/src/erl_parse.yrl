@@ -50,7 +50,7 @@ binary bin_elements bin_element bit_expr
 opt_bit_size_expr bit_size_expr opt_bit_type_list bit_type_list bit_type
 top_type top_type_100 top_types type typed_expr typed_attr_val tuple_types
 type_sig type_sigs type_guard type_guards fun_type fun_type_100 binary_type
-type_spec spec_fun typed_record_fields typed_record_expr typed_record_exprs
+type_spec spec_fun typed_exprs typed_record_fields typed_record_expr typed_record_exprs
 field_types field_type map_pair_types map_pair_type
 bin_base_type bin_unit_type type_200 type_300 type_400 type_500.
 
@@ -92,18 +92,25 @@ spec_fun ->                  atom ':' atom : {'$1', '$3'}.
 typed_attr_val -> expr ',' typed_record_fields : {typed_record, '$1', '$3'}.
 typed_attr_val -> expr '::' top_type           : {type_def, '$1', '$3'}.
 
-typed_record_fields -> '{' typed_record_expr typed_record_exprs :
-                           {tuple, ?anno('$1'), ['$2' | '$3']}.
+typed_record_fields -> '{' typed_exprs '}' : {tuple, ?anno('$1'), '$2'}.
+%% typed_record_fields -> '{' typed_exprs ',' '}' : {tuple, ?anno('$1'), '$2'}.
+%% typed_record_fields -> '{' typed_record_expr typed_record_exprs :
+%%                            {tuple, ?anno('$1'), ['$2' | '$3']}.
 
-typed_record_exprs -> '}' : [].
-typed_record_exprs -> ',' '}' : [].
-typed_record_exprs -> ',' typed_record_expr typed_record_exprs : ['$2' | '$3'].
+%% typed_record_exprs -> '}' : [].
+%% typed_record_exprs -> ',' '}' : [].
+%% typed_record_exprs -> ',' typed_record_expr typed_record_exprs : ['$2' | '$3'].
 
-typed_record_expr -> typed_expr : '$1'.
-typed_record_expr -> expr : '$1'.
-
+%% typed_record_expr -> typed_expr : '$1'.
+%% typed_record_expr -> expr : '$1'.
 
 typed_expr -> expr '::' top_type          : {typed,'$1','$3'}.
+%% It can't contain only expr's
+typed_exprs -> typed_expr                 : ['$1'].
+typed_exprs -> typed_expr ',' typed_exprs : ['$1'|'$3'].
+typed_exprs -> expr ',' typed_exprs       : ['$1'|'$3'].
+typed_exprs -> typed_expr ',' exprs       : ['$1'|'$3'].
+
 
 type_sigs -> type_sig                     : ['$1'].
 type_sigs -> type_sig ';' type_sigs       : ['$1'|'$3'].
@@ -161,7 +168,7 @@ type -> '{' top_type tuple_types          : {type, ?anno('$1'),
                                              tuple, ['$2' | '$3']}.
 type -> '#' atom '{' '}'                  : {type, ?anno('$1'), record, ['$2']}.
 type -> '#' atom '{' field_type field_types : {type, ?anno('$1'),
-                                               record, ['$2'|'$4']}.
+                                               record, ['$2', '$4' | '$5']}.
 type -> binary_type                       : '$1'.
 type -> integer                           : '$1'.
 type -> char                              : '$1'.
@@ -185,7 +192,7 @@ tuple_types -> ',' top_type tuple_types : ['$2' | '$3'].
 
 map_pair_types -> '}'                              : [].
 map_pair_types -> ',' '}'                          : [].
-map_pair_types -> ',' map_pair_type map_pair_types : ['$1'|'$3'].
+map_pair_types -> ',' map_pair_type map_pair_types : ['$2'|'$3'].
 
 map_pair_type  -> top_type '=>' top_type  : {type, ?anno('$2'),
                                              map_field_assoc,['$1','$3']}.
